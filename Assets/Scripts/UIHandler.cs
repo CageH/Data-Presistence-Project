@@ -17,6 +17,11 @@ public class UIHandler : MonoBehaviour
     {
         
     }
+
+    public void SaveName()
+    {
+
+    }
     public void StartNew()
     {
         SceneManager.LoadScene(0);

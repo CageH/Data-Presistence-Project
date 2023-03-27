@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,17 +12,24 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BastScoreText;
+    public string PlayerName = "Name";
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
+    private int m_BestPoints;
     
     private bool m_GameOver = false;
 
-    
+
     // Start is called before the first frame update
+    //[System.Serializable]
+
     void Start()
     {
+        LoadPoints();
+        BastScoreText.text = $"Best Score : {PlayerName}: {m_BestPoints}";
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -61,6 +69,33 @@ public class MainManager : MonoBehaviour
             }
         }
     }
+    [System.Serializable]
+    class SaveData
+    {
+        public int Points;
+    }
+    public void SavePoints()
+    {
+        if (m_Points > m_BestPoints)
+        {
+            SaveData data = new SaveData();
+            data.Points = m_Points;
+
+            string json = JsonUtility.ToJson(data);
+            File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+        }
+    }
+    public void LoadPoints()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            m_BestPoints = data.Points;
+        }
+    }
 
     void AddPoint(int point)
     {
@@ -70,7 +105,9 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        SavePoints();
         m_GameOver = true;
         GameOverText.SetActive(true);
+        
     }
 }
